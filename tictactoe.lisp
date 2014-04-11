@@ -69,12 +69,35 @@
     (if (zerop (nth pos board))
       pos(pick-random-empty-position board))))
 
+(defun find-empty-position (board squares)
+  (find-if #'(lambda (pos)
+               (zerop (nth pos board)))
+           squares))
+
+(defun win-or-block (board target-sum)
+  (let ((triplet (find-if
+                   #'(lambda (trip)
+                       (equal (sum-triplet board trip) target-sum))
+                   *triplets*)))
+    (when triplet
+      (find-empty-position board triplet))))
+
 (defun random-move-strategy (board)
   (list (pick-random-empty-position board)
         "Random move"))
 
+(defun make-three-in-a-row (board)
+  (let ((pos (win-or-block board (* 2 *computer*))))
+    (and pos (list pos "Try to make three in a row"))))
+
+(defun block-player-win (board)
+  (let ((pos (win-or-block board (* 2 *player*))))
+    (and pos (list pos "Blocking player win"))))
+
 (defun choose-best-move (board)
-  (random-move-strategy board))
+  (or (make-three-in-a-row board)
+      (block-player-win board)
+      (random-move-strategy board)))
 
 (defun computer-move (board)
   "Placeholder"
